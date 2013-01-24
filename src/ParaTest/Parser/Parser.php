@@ -17,9 +17,55 @@ class Parser
             throw new \InvalidArgumentException("file not found");
 
         $this->path = $srcPath;
+
+        if(!$this->getNamespace()) {
+            $this->refl = $this->getReflectionClassForFile($this->path);
+            return;
+        }
+
         $class = $this->getClassName();
         require_once($this->path);
         $this->refl = new \ReflectionClass($class);
+    }
+
+    public function getReflectionClassForFile($path)
+    {
+        \PHPUnit_Util_Fileloader::checkAndLoad($path);
+        $loadedClasses = $this->file_get_php_classes($path);
+        $testCaseClass = 'PHPUnit_Framework_TestCase';
+
+        foreach ($loadedClasses as $loadedClass) {
+            $class = new \ReflectionClass($loadedClass);
+
+            if ($class->isSubclassOf($testCaseClass)) {
+                return $class;
+            }
+        }
+
+        return null;
+    }
+
+    function file_get_php_classes($filepath) {
+        $php_code = file_get_contents($filepath);
+        $classes = $this->get_php_classes($php_code);
+        return $classes;
+    }
+
+    function get_php_classes($php_code) {
+        $classes = array();
+        $tokens = token_get_all($php_code);
+        $count = count($tokens);
+        for ($i = 2; $i < $count; $i++) {
+            if (   $tokens[$i - 2][0] == T_CLASS
+                && $tokens[$i - 1][0] == T_WHITESPACE
+                && $tokens[$i][0] == T_STRING) {
+
+                $class_name = $tokens[$i][1];
+                $classes[] = $class_name;
+            }
+        }
+
+        return $classes;
     }
 
     public function getClass()
