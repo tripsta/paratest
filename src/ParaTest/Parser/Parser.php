@@ -68,6 +68,10 @@ class Parser
         return $classes;
     }
 
+    /**
+     * Returns null fo abstract classes
+     * @return ParsedClass
+     */
     public function getClass()
     {
         return ($this->refl->isAbstract()) 
