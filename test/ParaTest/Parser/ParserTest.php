@@ -7,7 +7,7 @@ class ParserTest extends \TestBase
      */
     public function testConstructorThrowsExceptionIfFileNotFound()
     {
-        $parser = new Parser('/path/to/nowhere');
+        new Parser('/path/to/nowhere');
     }
 
     public function testFileNameResolvesToNamespacedClass()
