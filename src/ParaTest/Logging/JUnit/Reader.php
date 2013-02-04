@@ -54,12 +54,13 @@ class Reader extends MetaProvider
     function getCaseFeedback($case)
     {
         $feedback = '';
-        if ($case->failures)
-            $feedback .= 'F';
-        else if ($case->errors)
-            $feedback .= 'E';
-        else
+        if ($case->failures) {
+            $feedback .= 'F' . $this->instaFail($case->failures);
+        } else if ($case->errors) {
+            $feedback .= 'E' . $this->instaFail($case->errors);
+        } else {
             $feedback .= '.';
+        }
 
         $casesProcessed = \ParaTest\Runners\PHPUnit\ResultPrinter::$casesProcessed;
         $totalCases = \ParaTest\Runners\PHPUnit\ResultPrinter::$totalCases;
@@ -80,6 +81,15 @@ class Reader extends MetaProvider
     public function removeLog()
     {
         unlink($this->logFile);
+    }
+
+    protected function instaFail($case)
+    {
+        $moreInformation = '';
+        foreach ($case as $key => $information) {
+            $moreInformation .= sprintf("\n%d) %s\n", $key, $information['text']);
+        }
+        return $moreInformation;
     }
 
     protected function init()
