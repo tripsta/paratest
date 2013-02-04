@@ -83,8 +83,8 @@ class Reader extends MetaProvider
         $suites = $this->isSingle ? $this->suites : $this->suites[0]->suites;
         foreach($suites as $suite) {
             foreach($suite->cases as $case) {
-                if($case->failures) $feedback[] = 'F';
-                else if ($case->errors) $feedback[] = 'E';
+                if($case->failures) $feedback[] = 'F' . $this->instaFail($case->failures);
+                else if ($case->errors) $feedback[] = 'E' . $this->instaFail($case->errors);
                 else $feedback[] = '.';
             }
         }
@@ -97,6 +97,15 @@ class Reader extends MetaProvider
     public function removeLog()
     {
         unlink($this->logFile);
+    }
+
+    protected function instaFail($case)
+    {
+        $moreInformation = '';
+        foreach ($case as $key => $information) {
+            $moreInformation .= sprintf("\n%d) %s\n", $key, $information['text']);
+        }
+        return $moreInformation;
     }
 
     /**
