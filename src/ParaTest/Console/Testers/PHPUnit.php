@@ -42,13 +42,31 @@ class PHPUnit extends Tester
 
     protected function hasConfig(InputInterface $input)
     {
+		return $this->getConfigFile($input) != null;
+    }
+
+	public function getConfigFile(InputInterface $input)
+	{
         $cwd = getcwd() . DIRECTORY_SEPARATOR;
 
-        if($input->getOption('configuration'))
-            return true;
+        $file = $input->getOption('configuration');
+		if (!$file)
+			$file = file_exists($cwd . 'phpunit.xml.dist') ? $cwd . 'phpunit.xml.dist' : null;
+		if (!$file)
+			$file = file_exists($cwd . 'phpunit.xml') ? $cwd . 'phpunit.xml' : null;
+		return $file;
+	}
 
-        return file_exists($cwd . 'phpunit.xml.dist') || file_exists($cwd . 'phpunit.xml');
-    }
+	public function getBootstrapFromConfigFile($input)
+	{
+		$file = $this->getConfigFile($input);
+		$configuration = \PHPUnit_Util_Configuration::getInstance($file);
+		$configArray = $configuration->getPHPUnitConfiguration();
+		if (file_exists(realpath($configArray['bootstrap']))) {
+			return realpath($configArray['bootstrap']);
+		}
+		return null;
+	}
 
     protected function getRunnerOptions(InputInterface $input)
     {
@@ -56,6 +74,8 @@ class PHPUnit extends Tester
         $options = $this->getOptions($input);
         if(isset($options['bootstrap']) && file_exists($options['bootstrap']))
             require_once $options['bootstrap'];
+		else if ($this->getBootstrapFromConfigFile($input))
+            require_once $this->getBootstrapFromConfigFile($input);
         $options = ($path) ? array_merge(array('path' => $path), $options) : $options;
         return $options;
     }
