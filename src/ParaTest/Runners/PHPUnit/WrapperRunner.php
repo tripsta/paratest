@@ -30,6 +30,7 @@ class WrapperRunner
         $this->printer->start($this->options);
 
         $this->startWorkers();
+        sleep(1);
         $this->assignAllPendingTests();
         $this->sendStopMessages();
         $this->waitForAllToFinish();
@@ -71,12 +72,15 @@ class WrapperRunner
             $this->streams[] = $worker->stdout();
             $this->workers[] = $worker;
         }
+        echo sprintf('worker count in %s %s %s', __FUNCTION__, count($this->workers), PHP_EOL);
     }
 
     private function assignAllPendingTests()
     {
         $phpunit = $this->options->phpunit . ' --no-globals-backup';
         $phpunitOptions = $this->options->filtered;
+        echo sprintf('pending count %s%s', count($this->pending), PHP_EOL);
+
         while(count($this->pending)) {
             $this->waitForStreamsToChange($this->streams);
             foreach($this->progressedWorkers() as $worker) {
@@ -128,6 +132,7 @@ class WrapperRunner
     private function progressedWorkers()
     {
         $result = array();
+        echo sprintf('modifed count %s%s', count($this->modified), PHP_EOL);
         foreach($this->modified as $modifiedStream) {
             $found = null;
             foreach ($this->streams as $index => $stream) {
@@ -139,6 +144,7 @@ class WrapperRunner
             $result[$found] = $this->workers[$found];
         }
         $this->modified = array();
+        echo sprintf('worker count in %s %s %s', __FUNCTION__, count($result), PHP_EOL);
         return $result;
     }
 
