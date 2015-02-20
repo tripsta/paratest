@@ -102,10 +102,8 @@ class Parser
 
         foreach ($newClasses as $className) {
             $class = new \ReflectionClass($className);
-            if ($class->getFileName() == $filename) {
-                if ($this->classNameMatchesFileName($filename, $className)) {
-                    return $className;
-                }
+            if ($class->getFileName() == $filename && $class->implementsInterface('PHPUnit_Framework_Test')) {
+                return $className;
             }
         }
 
