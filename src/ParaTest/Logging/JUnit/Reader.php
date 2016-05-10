@@ -100,9 +100,9 @@ class Reader extends MetaProvider
         foreach ($suites as $suite) {
             foreach ($suite->cases as $case) {
                 if ($case->failures) {
-                    $feedback[] = 'F';
+                    $feedback[] = 'F' . $this->instantFail($case->failures);
                 } elseif ($case->errors) {
-                    $feedback[] = 'E';
+                    $feedback[] = 'E' . $this->instantFail($case->errors);
                 } else {
                     $feedback[] = '.';
                 }
@@ -217,5 +217,17 @@ class Reader extends MetaProvider
         if ($node !== false) {
             $this->suites[] = TestSuite::suiteFromNode($node);
         }
+    }
+
+    /**
+     * Instant return the error of the failed test
+     */
+    protected function instantFail($case)
+    {
+    	$moreInformation = '';
+    	foreach ($case as $key => $information) {
+    		$moreInformation .= sprintf("\n%d) %s\n", $key, $information['text']);
+    	}
+    	return $moreInformation;
     }
 }
